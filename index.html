@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podología Céspedes - Gestión Premium</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img class="brand-logo" src="logo de podologia.jpeg" alt="Podología Céspedes">
+                <span>Podología <span class="highlight">Céspedes</span></span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-target="dashboard">
+                    <i class='bx bxs-dashboard'></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link" data-target="patients">
+                    <i class='bx bxs-user-detail'></i>
+                    <span>Pacientes</span>
+                </a>
+                <a href="#" class="nav-link" data-target="appointments">
+                    <i class='bx bxs-calendar'></i>
+                    <span>Turnos</span>
+                </a>
+                <a href="#" class="nav-link" data-target="history">
+                    <i class='bx bxs-folder-open'></i>
+                    <span>Historial</span>
+                </a>
+                <a href="#" class="nav-link" data-target="settings">
+                    <i class='bx bxs-cog'></i>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>&copy; 2025 Podología Céspedes</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="page-title">
+                    <h1 id="page-title">Dashboard</h1>
+                    <p id="page-subtitle">Bienvenido al sistema de gestión.</p>
+                </div>
+                <div class="user-profile">
+                    <img src="logo de podologia.jpeg" alt="Logo Podologia Céspedes">
+                    <div class="user-info">
+                        <span class="user-name">Jesús Luis Céspedes</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Sections -->
+            <div class="content-wrapper">
+
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="view-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="icon-box blue"><i class='bx bxs-user'></i></div>
+                            <div class="stat-info">
+                                <h3>Total Pacientes</h3>
+                                <p id="total-patients">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="icon-box purple"><i class='bx bxs-calendar-check'></i></div>
+                            <div class="stat-info">
+                                <h3>Turnos Hoy</h3>
+                                <p id="today-appointments">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="icon-box green"><i class='bx bxs-folder-open'></i></div>
+                            <div class="stat-info">
+                                <h3>Historiales</h3>
+                                <p id="total-history">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Patients Section -->
+                <section id="patients" class="view-section">
+                    <div class="section-header">
+                        <h2>Gestión de Pacientes</h2>
+                        <button class="btn-primary" onclick="openModal('patient-modal')">
+                            <i class='bx bx-plus'></i> Nuevo Paciente
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Edad</th>
+                                    <th>Teléfono</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patients-table-body">
+                                <!-- Dynamic Content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings" class="view-section">
+                    <div class="section-header">
+                        <h2>Configuración y Datos</h2>
+                    </div>
+                    <div class="table-container">
+                        <div
+                            style="max-width: 600px; margin: 30px auto; padding: 40px; background: #fff; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">
+                            <i class='bx bxs-data' style="font-size: 4rem; color: #3498db; margin-bottom: 20px;"></i>
+                            <h3 style="margin-bottom: 10px; color: #2c3e50;">Copia de Seguridad</h3>
+                            <p style="color: #7f8c8d; margin-bottom: 30px;">
+                                Exporta tus datos periódicamente para evitar pérdidas o importa una copia de seguridad
+                                existente.
+                            </p>
+
+                            <div style="display: grid; gap: 15px;">
+                                <button onclick="exportPodologyData()" class="btn-secondary"
+                                    style="width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #3498db; color: #3498db; background: white;">
+                                    <i class='bx bx-export'></i> Exportar Todos los Datos
+                                </button>
+
+                                <button onclick="document.getElementById('import-file').click()" class="btn-primary"
+                                    style="width: 100%; padding: 15px; font-size: 1.1rem;">
+                                    <i class='bx bx-import'></i> Importar Datos
+                                </button>
+                            </div>
+
+                            <input type="file" id="import-file" accept=".json" style="display: none;"
+                                onchange="importPodologyData(event)">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Appointments Section -->
+                <section id="appointments" class="view-section">
+                    <div class="section-header">
+                        <h2>Turnos Programados</h2>
+                        <button class="btn-primary" onclick="openModal('appointment-modal')">
+                            <i class='bx bx-plus'></i> Nuevo Turno
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Paciente</th>
+                                    <th>Podólogo/a</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointments-table-body">
+                                <!-- Dynamic Content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- History Section -->
+                <section id="history" class="view-section">
+                    <div class="section-header">
+                        <h2>Historial Clínico</h2>
+                        <button class="btn-primary" onclick="openModal('history-modal')">
+                            <i class='bx bx-plus'></i> Nuevo Registro
+                        </button>
+                        <button class="btn-secondary" onclick="deleteAllHistory()"
+                            style="background: #e74c3c; margin-left: 10px;">
+                            <i class='bx bxs-trash'></i> Borrar Todo
+                        </button>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" id="history-search" placeholder="Buscar por ID de paciente...">
+                        <button class="btn-secondary" onclick="searchHistory()">Buscar</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Paciente</th>
+                                    <th>Diagnóstico</th>
+                                    <th>Tratamiento</th>
+                                    <th>Observaciones</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <!-- Dynamic Content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Patient Modal -->
+    <div id="patient-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('patient-modal')">&times;</span>
+            <h2>Nuevo Paciente</h2>
+            <form id="patient-form">
+                <input type="hidden" id="p-id">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="p-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <input type="text" id="p-lastname" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha Nacimiento</label>
+                    <input type="date" id="p-dob" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" id="p-phone">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="p-email">
+                </div>
+                <!-- Campos específicos de Podología -->
+                <div class="form-group">
+                    <label>¿Tiene Diabetes?</label>
+                    <select id="p-diabetes">
+                        <option value="no">No</option>
+                        <option value="si">Sí</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Pie</label>
+                    <select id="p-foottype">
+                        <option value="">Seleccionar...</option>
+                        <option value="normal">Normal</option>
+                        <option value="plano">Plano</option>
+                        <option value="cavo">Cavo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Talla de Calzado</label>
+                    <input type="text" id="p-shoesize" placeholder="Ej: 40">
+                </div>
+                <button type="submit" class="btn-primary full-width">Guardar Paciente</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div id="appointment-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('appointment-modal')">&times;</span>
+            <h2>Nuevo Turno</h2>
+            <form id="appointment-form">
+                <div class="form-group">
+                    <label>Paciente</label>
+                    <select id="a-patient" required>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="a-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Hora</label>
+                    <input type="time" id="a-time" required>
+                </div>
+                <button type="submit" class="btn-primary full-width">Agendar Turno</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="history-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('history-modal')">&times;</span>
+            <h2>Nuevo Historial</h2>
+            <form id="history-form">
+                <input type="hidden" id="h-id">
+                <div class="form-group">
+                    <label>Paciente</label>
+                    <select id="h-patient" required>
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="h-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Diagnóstico</label>
+                    <textarea id="h-diagnosis" required rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tratamiento</label>
+                    <textarea id="h-treatment" required rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <textarea id="h-notes" rows="2"></textarea>
+                </div>
+                <!-- Sistema de Fotos de Precisión -->
+                <div class="form-group">
+                    <label><i class='bx bx-camera'></i> Fotos del Tratamiento (Posiciones 1, 2 y 3)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px;">
+                        <!-- Columna ANTES -->
+                        <div>
+                            <p style="font-weight: bold; font-size: 0.8rem; color: #e74c3c; margin-bottom: 5px;">ESTADO
+                                ANTES</p>
+                            <div class="photo-slot"
+                                style="margin-bottom: 10px; padding: 10px; border: 1px solid #eee; border-radius: 8px;">
+                                <label style="display: block; font-size: 0.75rem; color: #888;">Posición 1</label>
+                                <input type="file" id="h-photo-before-1" accept="image/*"
+                                    style="font-size: 0.8rem; width: 100%;">
+                                <div id="p-b-1" style="margin-top: 5px;"></div>
+                            </div>
+                            <div class="photo-slot"
+                                style="margin-bottom: 10px; padding: 10px; border: 1px solid #eee; border-radius: 8px;">
+                                <label style="display: block; font-size: 0.75rem; color: #888;">Posición 2</label>
+                                <input type="file" id="h-photo-before-2" accept="image/*"
+                                    style="font-size: 0.8rem; width: 100%;">
+                                <div id="p-b-2" style="margin-top: 5px;"></div>
+                            </div>
+                            <div class="photo-slot"
+                                style="margin-bottom: 10px; padding: 10px; border: 1px solid #eee; border-radius: 8px;">
+                                <label style="display: block; font-size: 0.75rem; color: #888;">Posición 3</label>
+                                <input type="file" id="h-photo-before-3" accept="image/*"
+                                    style="font-size: 0.8rem; width: 100%;">
+                                <div id="p-b-3" style="margin-top: 5px;"></div>
+                            </div>
+                        </div>
+                        <!-- Columna DESPUÉS -->
+                        <div>
+                            <p style="font-weight: bold; font-size: 0.8rem; color: #27ae60; margin-bottom: 5px;">ESTADO
+                                DESPUÉS</p>
+                            <div class="photo-slot"
+                                style="margin-bottom: 10px; padding: 10px; border: 1px solid #eee; border-radius: 8px;">
+                                <label style="display: block; font-size: 0.75rem; color: #888;">Posición 1</label>
+                                <input type="file" id="h-photo-after-1" accept="image/*"
+                                    style="font-size: 0.8rem; width: 100%;">
+                                <div id="p-a-1" style="margin-top: 5px;"></div>
+                            </div>
+                            <div class="photo-slot"
+                                style="margin-bottom: 10px; padding: 10px; border: 1px solid #eee; border-radius: 8px;">
+                                <label style="display: block; font-size: 0.75rem; color: #888;">Posición 2</label>
+                                <input type="file" id="h-photo-after-2" accept="image/*"
+                                    style="font-size: 0.8rem; width: 100%;">
+                                <div id="p-a-2" style="margin-top: 5px;"></div>
+                            </div>
+                            <div class="photo-slot"
+                                style="margin-bottom: 10px; padding: 10px; border: 1px solid #eee; border-radius: 8px;">
+                                <label style="display: block; font-size: 0.75rem; color: #888;">Posición 3</label>
+                                <input type="file" id="h-photo-after-3" accept="image/*"
+                                    style="font-size: 0.8rem; width: 100%;">
+                                <div id="p-a-3" style="margin-top: 5px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary full-width">Guardar Historial</button>
+            </form>
+        </div>
+    </div>
+    <!-- Visor de Fotos / Comparativa -->
+    <div id="photo-viewer" class="modal-viewer">
+        <span class="close-viewer" onclick="closeViewer()">&times;</span>
+        <div class="viewer-content">
+            <div id="scroll-gallery"
+                style="display: flex; flex-direction: column; gap: 40px; overflow-y: auto; max-height: 85vh; padding-right: 15px;">
+                <!-- Las comparaciones se inyectan aquí con scroll -->
+            </div>
+            <div class="viewer-controls" style="display: none;">
+                <div id="pair-selectors"
+                    style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px;">
+                    <!-- Botones antiguos eliminados -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
