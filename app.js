@@ -3,13 +3,39 @@
 // ========================================
 
 const Storage = {
-    get: (key) => JSON.parse(localStorage.getItem(key)) || [],
-    getOne: (key) => JSON.parse(localStorage.getItem(key)) || null,
-    set: (key, data) => localStorage.setItem(key, JSON.stringify(data)),
+    get: (key) => {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        try {
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (_) {
+            return [];
+        }
+    },
+    getOne: (key) => {
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+        try {
+            return JSON.parse(raw);
+        } catch (_) {
+            return null;
+        }
+    },
+    set: (key, data) => {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+        } catch (e) {
+            throw new Error(`StorageError: No se pudo guardar "${key}" en el navegador (${e && e.name ? e.name : 'error'})`);
+        }
+    },
     add: (key, item) => {
         const data = Storage.get(key);
-        const id = data.length > 0 ? Math.max(...data.map(i => i.id)) + 1 : 1;
-        item.id = id;
+        const numericIds = data
+            .map(i => Number(i && i.id))
+            .filter(n => Number.isFinite(n) && n > 0);
+        const nextId = numericIds.length > 0 ? Math.max(...numericIds) + 1 : 1;
+        item.id = nextId;
         data.push(item);
         Storage.set(key, data);
         return item;
@@ -37,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDashboard();
     populateSelects();
     setupPhotoPreviews();
+    setupMobileMenu();
 
     // Limpiar formulario de historial al abrirlo como nuevo
     const newHistoryBtn = document.querySelector('button[onclick*="history-modal"]');
@@ -48,6 +75,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+function setupMobileMenu() {
+    const toggle = document.getElementById('menu-toggle');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-open');
+        });
+    }
+    if (overlay) {
+        overlay.addEventListener('click', () => {
+            document.body.classList.remove('sidebar-open');
+        });
+    }
+}
 
 function setupNavigation() {
     const links = document.querySelectorAll('.nav-link');
@@ -74,6 +116,10 @@ function setupNavigation() {
             if (targetId === 'patients') loadPatients();
             if (targetId === 'appointments') { loadAppointments(); populateSelects(); }
             if (targetId === 'history') { populateSelects(); searchHistory(); }
+
+            if (window.innerWidth <= 768) {
+                document.body.classList.remove('sidebar-open');
+            }
         });
     });
 }
@@ -100,7 +146,7 @@ function loadDashboard() {
     const a = Storage.get('appointments');
     const h = Storage.get('history');
     const today = new Date().toISOString().split('T')[0];
-    const todayApps = a.filter(item => item.date === today);
+    const todayApps = a.filter(item => item.date === today && (item.status || 'Pendiente') === 'Pendiente');
 
     document.getElementById('total-patients').innerText = p.length;
     document.getElementById('today-appointments').innerText = todayApps.length;
@@ -112,29 +158,33 @@ const patientForm = document.getElementById('patient-form');
 if (patientForm) {
     patientForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const id = document.getElementById('p-id').value;
-        const patientData = {
-            name: document.getElementById('p-name').value,
-            lastname: document.getElementById('p-lastname').value,
-            dob: document.getElementById('p-dob').value,
-            phone: document.getElementById('p-phone').value,
-            email: document.getElementById('p-email').value,
-            diabetes: document.getElementById('p-diabetes').value,
-            foottype: document.getElementById('p-foottype').value,
-            shoesize: document.getElementById('p-shoesize').value
-        };
+        try {
+            const id = document.getElementById('p-id').value;
+            const patientData = {
+                name: document.getElementById('p-name').value,
+                lastname: document.getElementById('p-lastname').value,
+                dob: document.getElementById('p-dob').value,
+                phone: document.getElementById('p-phone').value,
+                email: document.getElementById('p-email').value,
+                diabetes: document.getElementById('p-diabetes').value,
+                foottype: document.getElementById('p-foottype').value,
+                shoesize: document.getElementById('p-shoesize').value
+            };
 
-        if (id) {
-            patientData.id = parseInt(id);
-            Storage.update('patients', patientData);
-        } else {
-            Storage.add('patients', patientData);
+            if (id) {
+                patientData.id = parseInt(id);
+                Storage.update('patients', patientData);
+            } else {
+                Storage.add('patients', patientData);
+            }
+            closeModal('patient-modal');
+            patientForm.reset();
+            loadPatients();
+            loadDashboard();
+            alert('✅ Paciente guardado correctamente');
+        } catch (err) {
+            alert(`❌ No se pudo guardar el paciente.\n${err && err.message ? err.message : err}`);
         }
-        closeModal('patient-modal');
-        patientForm.reset();
-        loadPatients();
-        loadDashboard();
-        alert('✅ Paciente guardado correctamente');
     });
 }
 
@@ -203,17 +253,32 @@ const appForm = document.getElementById('appointment-form');
 if (appForm) {
     appForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        Storage.add('appointments', {
-            patientId: document.getElementById('a-patient').value,
-            date: document.getElementById('a-date').value,
-            time: document.getElementById('a-time').value,
-            status: 'Pendiente'
-        });
-        closeModal('appointment-modal');
-        appForm.reset();
-        loadAppointments();
-        loadDashboard();
-        alert('✅ Turno agendado');
+        try {
+            const id = document.getElementById('a-id') ? document.getElementById('a-id').value : '';
+            if (id) {
+                const current = Storage.get('appointments').find(a => a.id == id);
+                if (!current) throw new Error('Turno no encontrado');
+                current.patientId = document.getElementById('a-patient').value;
+                current.date = document.getElementById('a-date').value;
+                current.time = document.getElementById('a-time').value;
+                Storage.update('appointments', current);
+            } else {
+                Storage.add('appointments', {
+                    patientId: document.getElementById('a-patient').value,
+                    date: document.getElementById('a-date').value,
+                    time: document.getElementById('a-time').value,
+                    status: 'Pendiente'
+                });
+            }
+            closeModal('appointment-modal');
+            appForm.reset();
+            if (document.getElementById('a-id')) document.getElementById('a-id').value = '';
+            loadAppointments();
+            loadDashboard();
+            alert('✅ Turno agendado');
+        } catch (err) {
+            alert(`❌ No se pudo agendar el turno.\n${err && err.message ? err.message : err}`);
+        }
     });
 }
 
@@ -225,6 +290,20 @@ function loadAppointments() {
     tbody.innerHTML = '';
     appointments.forEach(a => {
         const p = patients.find(pat => pat.id == a.patientId) || { name: 'Desconocido', lastname: '' };
+        const status = a.status || 'Pendiente';
+        const statusStyle = status === 'Pendiente' ? 'color: #e67e22; font-weight: bold;' : (status === 'Asistió' ? 'color: green; font-weight: bold;' : 'color: #e74c3c; font-weight: bold;');
+        const actions = status === 'Pendiente'
+            ? `
+                <button class="btn-secondary" onclick="editAppointment(${a.id})" style="padding:5px 8px; font-size:11px; background:#3498db;">Editar</button>
+                <button class="btn-secondary" onclick="markAppointmentAsAttended(${a.id})" style="padding:5px 8px; font-size:11px; background:#27ae60;">Asistió</button>
+                <button class="btn-secondary" onclick="cancelAppointment(${a.id})" style="padding:5px 8px; font-size:11px; background:#e74c3c; margin-left:6px;">Cancelar</button>
+                <button class="btn-secondary" onclick="deleteAppointment(${a.id})" style="padding:5px 8px; font-size:11px; background:#7f8c8d; margin-left:6px;">Eliminar</button>
+              `
+            : `
+                <button class="btn-secondary" onclick="editAppointment(${a.id})" style="padding:5px 8px; font-size:11px; background:#3498db;">Editar</button>
+                <button class="btn-secondary" onclick="reopenAppointment(${a.id})" style="padding:5px 8px; font-size:11px; background:#2c3e50; margin-left:6px;">Reabrir</button>
+                <button class="btn-secondary" onclick="deleteAppointment(${a.id})" style="padding:5px 8px; font-size:11px; background:#7f8c8d; margin-left:6px;">Eliminar</button>
+              `;
         tbody.innerHTML += `
             <tr>
                 <td>#${a.id}</td>
@@ -232,11 +311,73 @@ function loadAppointments() {
                 <td>${a.time}</td>
                 <td>${p.name} ${p.lastname}</td>
                 <td>Podólogo/a</td>
-                <td><span style="color: green; font-weight: bold;">${a.status}</span></td>
+                <td><span style="${statusStyle}">${status}</span></td>
+                <td>${actions}</td>
             </tr>
         `;
     });
 }
+
+window.markAppointmentAsAttended = function (id) {
+    try {
+        const appointment = Storage.get('appointments').find(a => a.id == id);
+        if (!appointment) return;
+        appointment.status = 'Asistió';
+        Storage.update('appointments', appointment);
+        loadAppointments();
+        loadDashboard();
+    } catch (err) {
+        alert(`❌ No se pudo actualizar el turno.\n${err && err.message ? err.message : err}`);
+    }
+};
+
+window.cancelAppointment = function (id) {
+    if (!confirm('¿Cancelar este turno?')) return;
+    try {
+        const appointment = Storage.get('appointments').find(a => a.id == id);
+        if (!appointment) return;
+        appointment.status = 'Cancelado';
+        Storage.update('appointments', appointment);
+        loadAppointments();
+        loadDashboard();
+    } catch (err) {
+        alert(`❌ No se pudo actualizar el turno.\n${err && err.message ? err.message : err}`);
+    }
+};
+
+window.reopenAppointment = function (id) {
+    try {
+        const appointment = Storage.get('appointments').find(a => a.id == id);
+        if (!appointment) return;
+        appointment.status = 'Pendiente';
+        Storage.update('appointments', appointment);
+        loadAppointments();
+        loadDashboard();
+    } catch (err) {
+        alert(`❌ No se pudo actualizar el turno.\n${err && err.message ? err.message : err}`);
+    }
+};
+
+window.deleteAppointment = function (id) {
+    if (!confirm('¿Eliminar este turno?')) return;
+    try {
+        Storage.delete('appointments', id);
+        loadAppointments();
+        loadDashboard();
+    } catch (err) {
+        alert(`❌ No se pudo eliminar el turno.\n${err && err.message ? err.message : err}`);
+    }
+};
+
+window.editAppointment = function (id) {
+    const a = Storage.get('appointments').find(x => x.id == id);
+    if (!a) return;
+    if (document.getElementById('a-id')) document.getElementById('a-id').value = a.id;
+    document.getElementById('a-patient').value = a.patientId;
+    document.getElementById('a-date').value = a.date;
+    document.getElementById('a-time').value = a.time;
+    openModal('appointment-modal');
+};
 
 // --- Fotos: Previsualización y Procesamiento ---
 function setupPhotoPreviews() {

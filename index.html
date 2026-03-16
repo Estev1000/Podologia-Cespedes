@@ -59,6 +59,9 @@
         <!-- Main Content Area -->
         <main class="main-content">
             <header class="top-bar">
+                <button id="menu-toggle" class="menu-toggle" type="button" aria-label="Abrir menú">
+                    <i class='bx bx-menu'></i>
+                </button>
                 <div class="page-title">
                     <h1 id="page-title">Dashboard</h1>
                     <p id="page-subtitle">Bienvenido al sistema de gestión.</p>
@@ -179,6 +182,7 @@
                                     <th>Paciente</th>
                                     <th>Podólogo/a</th>
                                     <th>Estado</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="appointments-table-body">
@@ -225,6 +229,7 @@
 
             </div>
         </main>
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
     </div>
 
     <!-- Modals -->
@@ -287,6 +292,7 @@
             <span class="close-modal" onclick="closeModal('appointment-modal')">&times;</span>
             <h2>Nuevo Turno</h2>
             <form id="appointment-form">
+                <input type="hidden" id="a-id">
                 <div class="form-group">
                     <label>Paciente</label>
                     <select id="a-patient" required>

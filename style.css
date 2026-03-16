@@ -117,6 +117,23 @@ body {
     border-bottom: 1px solid var(--border-color);
 }
 
+.menu-toggle {
+    display: none;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--secondary-color);
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.menu-toggle i {
+    font-size: 22px;
+}
+
 .page-title h1 {
     font-size: 24px;
     color: var(--secondary-color);
@@ -166,6 +183,10 @@ body {
     flex: 1;
     padding: 30px 40px;
     overflow-y: auto;
+}
+
+.sidebar-overlay {
+    display: none;
 }
 
 /* Sections */
@@ -545,6 +566,52 @@ body {
 }
 
 @media (max-width: 768px) {
+    body {
+        overflow: auto;
+    }
+
+    .menu-toggle {
+        display: inline-flex;
+    }
+
+    .top-bar {
+        padding: 16px 16px;
+        gap: 12px;
+    }
+
+    .content-wrapper {
+        padding: 18px 16px;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 260px;
+        transform: translateX(-105%);
+        transition: transform 0.25s ease;
+        z-index: 250;
+    }
+
+    body.sidebar-open .sidebar {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 240;
+    }
+
+    body.sidebar-open .sidebar-overlay {
+        display: block;
+    }
+
     .compare-container {
         grid-template-columns: 1fr;
     }
