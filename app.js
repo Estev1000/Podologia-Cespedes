@@ -204,10 +204,29 @@ window.editPatient = function (id) {
 };
 
 function loadPatients() {
-    const patients = Storage.get('patients');
+    const allPatients = Storage.get('patients');
+    const searchInput = document.getElementById('patient-search');
+    const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const patients = q
+        ? allPatients.filter(p =>
+            (p.name && p.name.toLowerCase().includes(q)) ||
+            (p.lastname && p.lastname.toLowerCase().includes(q)) ||
+            (p.phone && p.phone.toLowerCase().includes(q))
+        )
+        : allPatients;
+
     const tbody = document.getElementById('patients-table-body');
     if (!tbody) return;
     tbody.innerHTML = '';
+
+    if (patients.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#888; padding:30px;">
+            <i class='bx bx-search' style="font-size:2rem; display:block; margin-bottom:8px;"></i>
+            No se encontraron pacientes${q ? ` para "<strong>${q}</strong>"` : ''}.
+        </td></tr>`;
+        return;
+    }
+
     patients.forEach(p => {
         const age = new Date().getFullYear() - new Date(p.dob).getFullYear();
         const diabetesIcon = p.diabetes === 'si' ? '⚠️' : '';
@@ -283,11 +302,34 @@ if (appForm) {
 }
 
 function loadAppointments() {
-    const appointments = Storage.get('appointments');
+    const allAppointments = Storage.get('appointments');
     const patients = Storage.get('patients');
+
+    const searchInput = document.getElementById('appointment-search');
+    const statusFilter = document.getElementById('appointment-status-filter');
+    const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const statusQ = statusFilter ? statusFilter.value : '';
+
+    const appointments = allAppointments.filter(a => {
+        const p = patients.find(pat => pat.id == a.patientId) || { name: '', lastname: '' };
+        const fullName = `${p.name} ${p.lastname}`.toLowerCase();
+        const matchText = !q || fullName.includes(q) || (a.date && a.date.includes(q));
+        const matchStatus = !statusQ || (a.status || 'Pendiente') === statusQ;
+        return matchText && matchStatus;
+    });
+
     const tbody = document.getElementById('appointments-table-body');
     if (!tbody) return;
     tbody.innerHTML = '';
+
+    if (appointments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#888; padding:30px;">
+            <i class='bx bx-search' style="font-size:2rem; display:block; margin-bottom:8px;"></i>
+            No se encontraron turnos${q ? ` para "<strong>${q}</strong>"` : ''}${statusQ ? ` con estado "<strong>${statusQ}</strong>"` : ''}.
+        </td></tr>`;
+        return;
+    }
+
     appointments.forEach(a => {
         const p = patients.find(pat => pat.id == a.patientId) || { name: 'Desconocido', lastname: '' };
         const status = a.status || 'Pendiente';
@@ -317,6 +359,7 @@ function loadAppointments() {
         `;
     });
 }
+
 
 window.markAppointmentAsAttended = function (id) {
     try {

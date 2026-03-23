@@ -112,6 +112,12 @@
                             <i class='bx bx-plus'></i> Nuevo Paciente
                         </button>
                     </div>
+                    <div class="search-bar">
+                        <input type="text" id="patient-search" placeholder="Buscar por nombre, apellido o teléfono..."
+                            oninput="loadPatients()">
+                        <button class="btn-secondary" onclick="loadPatients()"><i class='bx bx-search'></i>
+                            Buscar</button>
+                    </div>
                     <div class="table-container">
                         <table class="data-table">
                             <thead>
@@ -171,6 +177,19 @@
                         <button class="btn-primary" onclick="openModal('appointment-modal')">
                             <i class='bx bx-plus'></i> Nuevo Turno
                         </button>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" id="appointment-search"
+                            placeholder="Buscar por nombre de paciente o fecha..." oninput="loadAppointments()">
+                        <select id="appointment-status-filter" onchange="loadAppointments()"
+                            style="padding:8px 12px; border-radius:8px; border:1px solid #e0e0e0; font-family:inherit; font-size:0.9rem;">
+                            <option value="">Todos los estados</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Asistió">Asistió</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                        <button class="btn-secondary" onclick="loadAppointments()"><i class='bx bx-search'></i>
+                            Buscar</button>
                     </div>
                     <div class="table-container">
                         <table class="data-table">
