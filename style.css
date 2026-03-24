@@ -620,3 +620,636 @@ body {
         height: 35vh;
     }
 }
+
+/* ============================================
+   CALENDARIO DE TURNOS — Estilo Google Calendar
+   ============================================ */
+
+/* Sección Appointments ocupa todo el espacio disponible */
+#appointments {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    gap: 0;
+}
+
+#appointments.active {
+    display: flex;
+}
+
+/* --- Toolbar --- */
+.cal-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0 18px 0;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.cal-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cal-nav h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+    min-width: 140px;
+    text-align: center;
+}
+
+.cal-nav-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--secondary-color);
+    font-size: 1.2rem;
+    transition: all 0.2s;
+}
+
+.cal-nav-btn:hover {
+    background: rgba(13, 138, 188, 0.08);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.cal-today-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--secondary-color);
+    transition: all 0.2s;
+    font-family: 'Outfit', sans-serif;
+}
+
+.cal-today-btn:hover {
+    background: rgba(13, 138, 188, 0.08);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.cal-view-tabs {
+    display: flex;
+    background: #f0f4f8;
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.cal-tab {
+    background: none;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-light);
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.2s;
+}
+
+.cal-tab.active {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Vistas --- */
+.cal-view {
+    display: none;
+    flex: 1;
+}
+
+.cal-view.active {
+    display: block;
+}
+
+/* --- Grilla Mensual --- */
+.cal-grid-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: white;
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+}
+
+.cal-grid-header span {
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border: 1px solid var(--border-color);
+    border-radius: 0 0 12px 12px;
+    background: var(--border-color);
+    gap: 1px;
+    overflow: hidden;
+    min-height: 400px;
+}
+
+.cal-cell {
+    background: white;
+    min-height: 90px;
+    padding: 6px 6px 4px 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+}
+
+.cal-cell:hover {
+    background: #f7f9fc;
+}
+
+.cal-cell.cal-other-month {
+    background: #fafafa;
+}
+
+.cal-cell.cal-other-month .cal-day-num {
+    color: #ccc;
+}
+
+.cal-cell.cal-today .cal-day-num {
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cal-cell.cal-selected {
+    background: rgba(13, 138, 188, 0.06);
+}
+
+.cal-day-num {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--secondary-color);
+    margin-bottom: 3px;
+}
+
+.cal-event {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.cal-event-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.cal-event.status-pendiente {
+    background: #fff4e0;
+    color: #b8650a;
+}
+
+.cal-event.status-pendiente .cal-event-dot {
+    background: #f39c12;
+}
+
+.cal-event.status-asistio {
+    background: #e8f8f0;
+    color: #1a7a47;
+}
+
+.cal-event.status-asistio .cal-event-dot {
+    background: #27ae60;
+}
+
+.cal-event.status-cancelado {
+    background: #fdecea;
+    color: #a93226;
+}
+
+.cal-event.status-cancelado .cal-event-dot {
+    background: #e74c3c;
+}
+
+.cal-more {
+    font-size: 0.68rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    padding: 1px 4px;
+    cursor: pointer;
+}
+
+/* --- Panel lateral del día --- */
+.cal-day-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100vh;
+    background: white;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.12);
+    z-index: 50;
+    padding: 20px;
+    overflow-y: auto;
+    animation: slideInRight 0.25s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.cal-day-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.cal-day-panel-header span {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+}
+
+.cal-panel-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--text-light);
+    padding: 2px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cal-panel-close:hover {
+    background: #f0f4f8;
+    color: var(--secondary-color);
+}
+
+.cal-panel-event {
+    border-left: 4px solid;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    background: #fafafa;
+}
+
+.cal-panel-event.status-pendiente {
+    border-color: #f39c12;
+}
+
+.cal-panel-event.status-asistio {
+    border-color: #27ae60;
+}
+
+.cal-panel-event.status-cancelado {
+    border-color: #e74c3c;
+}
+
+.cal-panel-event-time {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+}
+
+.cal-panel-event-patient {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    margin: 2px 0;
+}
+
+.cal-panel-event-notes {
+    font-size: 0.75rem;
+    color: var(--text-light);
+}
+
+.cal-panel-event-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.cal-panel-event-actions button {
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.cal-panel-event-actions button:hover {
+    opacity: 0.8;
+}
+
+.cal-panel-btn-attend {
+    background: #e8f8f0;
+    color: #1a7a47;
+}
+
+.cal-panel-btn-cancel {
+    background: #fdecea;
+    color: #a93226;
+}
+
+.cal-panel-btn-edit {
+    background: #e8f2ff;
+    color: #1a4dbf;
+}
+
+.cal-panel-btn-delete {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.cal-panel-btn-reopen {
+    background: #eee;
+    color: #333;
+}
+
+.cal-panel-empty {
+    text-align: center;
+    color: var(--text-light);
+    padding: 20px 0 8px;
+    font-size: 0.88rem;
+}
+
+/* --- Vista Semana --- */
+.cal-week-container {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.cal-week-day-header {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    border-bottom: 1px solid var(--border-color);
+    background: #f8fafc;
+}
+
+.cal-week-day-col {
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.cal-week-day-col.cal-today-col {
+    color: var(--primary-color);
+}
+
+.cal-week-body {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    min-height: 300px;
+}
+
+.cal-week-time-col {
+    border-right: 1px solid var(--border-color);
+}
+
+.cal-week-time-slot {
+    height: 54px;
+    padding: 4px 6px;
+    font-size: 0.7rem;
+    color: #bbb;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.cal-week-day-events {
+    border-right: 1px solid var(--border-color);
+    position: relative;
+}
+
+.cal-week-event {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    border-radius: 6px;
+    padding: 3px 6px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 2;
+}
+
+/* --- Vista Lista --- */
+.cal-list-search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.cal-list-search input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    min-width: 160px;
+}
+
+.cal-list-search input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(13, 138, 188, 0.1);
+}
+
+.cal-list-search select {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    background: white;
+}
+
+.cal-list-group {
+    margin-bottom: 18px;
+}
+
+.cal-list-date-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 6px 0 8px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 8px;
+}
+
+.cal-list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    border: 1px solid var(--border-color);
+    transition: box-shadow 0.15s;
+}
+
+.cal-list-item:hover {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+}
+
+.cal-list-status-bar {
+    width: 4px;
+    border-radius: 4px;
+    align-self: stretch;
+    flex-shrink: 0;
+}
+
+.cal-list-status-bar.status-pendiente {
+    background: #f39c12;
+}
+
+.cal-list-status-bar.status-asistio {
+    background: #27ae60;
+}
+
+.cal-list-status-bar.status-cancelado {
+    background: #e74c3c;
+}
+
+.cal-list-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cal-list-time {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 2px;
+}
+
+.cal-list-patient {
+    font-size: 0.93rem;
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+.cal-list-notes {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    margin-top: 2px;
+}
+
+.cal-list-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.cal-list-badge.status-pendiente {
+    background: #fff4e0;
+    color: #b8650a;
+}
+
+.cal-list-badge.status-asistio {
+    background: #e8f8f0;
+    color: #1a7a47;
+}
+
+.cal-list-badge.status-cancelado {
+    background: #fdecea;
+    color: #a93226;
+}
+
+.cal-list-actions {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.cal-list-actions button {
+    background: #f0f4f8;
+    border: none;
+    border-radius: 7px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    transition: background 0.15s, color 0.15s;
+}
+
+.cal-list-actions button:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.cal-list-empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-light);
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.cal-list-empty i {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 10px;
+}

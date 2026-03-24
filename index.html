@@ -170,44 +170,68 @@
                     </div>
                 </section>
 
-                <!-- Appointments Section -->
+                <!-- Appointments Section — Vista Calendario -->
                 <section id="appointments" class="view-section">
-                    <div class="section-header">
-                        <h2>Turnos Programados</h2>
-                        <button class="btn-primary" onclick="openModal('appointment-modal')">
+                    <!-- Toolbar del Calendario -->
+                    <div class="cal-toolbar">
+                        <div class="cal-nav">
+                            <button class="cal-nav-btn" id="cal-prev" title="Mes anterior"><i
+                                    class='bx bx-chevron-left'></i></button>
+                            <h2 id="cal-month-label">Marzo 2026</h2>
+                            <button class="cal-nav-btn" id="cal-next" title="Mes siguiente"><i
+                                    class='bx bx-chevron-right'></i></button>
+                            <button class="cal-today-btn" id="cal-today">Hoy</button>
+                        </div>
+                        <div class="cal-view-tabs">
+                            <button class="cal-tab active" data-view="month">Mes</button>
+                            <button class="cal-tab" data-view="week">Semana</button>
+                            <button class="cal-tab" data-view="list">Lista</button>
+                        </div>
+                        <button class="btn-primary" onclick="openModal('appointment-modal')" id="new-turno-btn">
                             <i class='bx bx-plus'></i> Nuevo Turno
                         </button>
                     </div>
-                    <div class="search-bar">
-                        <input type="text" id="appointment-search"
-                            placeholder="Buscar por nombre de paciente o fecha..." oninput="loadAppointments()">
-                        <select id="appointment-status-filter" onchange="loadAppointments()"
-                            style="padding:8px 12px; border-radius:8px; border:1px solid #e0e0e0; font-family:inherit; font-size:0.9rem;">
-                            <option value="">Todos los estados</option>
-                            <option value="Pendiente">Pendiente</option>
-                            <option value="Asistió">Asistió</option>
-                            <option value="Cancelado">Cancelado</option>
-                        </select>
-                        <button class="btn-secondary" onclick="loadAppointments()"><i class='bx bx-search'></i>
-                            Buscar</button>
+
+                    <!-- Vista MES -->
+                    <div id="cal-view-month" class="cal-view active">
+                        <div class="cal-grid-header">
+                            <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span>
+                            <span>Jue</span><span>Vie</span><span>Sáb</span>
+                        </div>
+                        <div class="cal-grid" id="cal-grid"></div>
                     </div>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Fecha</th>
-                                    <th>Hora</th>
-                                    <th>Paciente</th>
-                                    <th>Podólogo/a</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="appointments-table-body">
-                                <!-- Dynamic Content -->
-                            </tbody>
-                        </table>
+
+                    <!-- Vista SEMANA -->
+                    <div id="cal-view-week" class="cal-view">
+                        <div class="cal-week-container" id="cal-week-container"></div>
+                    </div>
+
+                    <!-- Vista LISTA -->
+                    <div id="cal-view-list" class="cal-view">
+                        <div class="cal-list-search">
+                            <input type="text" id="appointment-search" placeholder="🔍  Buscar paciente o fecha..."
+                                oninput="renderCalendar()">
+                            <select id="appointment-status-filter" onchange="renderCalendar()">
+                                <option value="">Todos los estados</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Asistió">Asistió</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        <div id="cal-list-body"></div>
+                    </div>
+
+                    <!-- Panel lateral: detalle del día seleccionado -->
+                    <div id="cal-day-panel" class="cal-day-panel" style="display:none;">
+                        <div class="cal-day-panel-header">
+                            <span id="cal-day-panel-title"></span>
+                            <button onclick="closeDayPanel()" class="cal-panel-close"><i class='bx bx-x'></i></button>
+                        </div>
+                        <div id="cal-day-panel-body"></div>
+                        <button class="btn-primary" style="width:100%; margin-top:14px; justify-content:center;"
+                            onclick="openNewTurnoForDay()">
+                            <i class='bx bx-plus'></i> Agendar en este día
+                        </button>
                     </div>
                 </section>
 
@@ -309,7 +333,7 @@
     <div id="appointment-modal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('appointment-modal')">&times;</span>
-            <h2>Nuevo Turno</h2>
+            <h2 id="appointment-modal-title">Nuevo Turno</h2>
             <form id="appointment-form">
                 <input type="hidden" id="a-id">
                 <div class="form-group">
@@ -325,6 +349,10 @@
                 <div class="form-group">
                     <label>Hora</label>
                     <input type="time" id="a-time" required>
+                </div>
+                <div class="form-group">
+                    <label>Motivo / Notas (opcional)</label>
+                    <textarea id="a-notes" rows="2" placeholder="Ej: Control de uña encarnada..."></textarea>
                 </div>
                 <button type="submit" class="btn-primary full-width">Agendar Turno</button>
             </form>
