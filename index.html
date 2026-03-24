@@ -108,7 +108,7 @@
                 <section id="patients" class="view-section">
                     <div class="section-header">
                         <h2>Gestión de Pacientes</h2>
-                        <button class="btn-primary" onclick="openModal('patient-modal')">
+                        <button class="btn-primary" onclick="openNewPatientModal()">
                             <i class='bx bx-plus'></i> Nuevo Paciente
                         </button>
                     </div>
@@ -187,7 +187,7 @@
                             <button class="cal-tab" data-view="week">Semana</button>
                             <button class="cal-tab" data-view="list">Lista</button>
                         </div>
-                        <button class="btn-primary" onclick="openModal('appointment-modal')" id="new-turno-btn">
+                        <button class="btn-primary" onclick="openNewAppointmentModal()" id="new-turno-btn">
                             <i class='bx bx-plus'></i> Nuevo Turno
                         </button>
                     </div>
@@ -239,7 +239,7 @@
                 <section id="history" class="view-section">
                     <div class="section-header">
                         <h2>Historial Clínico</h2>
-                        <button class="btn-primary" onclick="openModal('history-modal')">
+                        <button class="btn-primary" onclick="openNewHistoryModal()">
                             <i class='bx bx-plus'></i> Nuevo Registro
                         </button>
                         <button class="btn-secondary" onclick="deleteAllHistory()"
@@ -248,7 +248,8 @@
                         </button>
                     </div>
                     <div class="search-bar">
-                        <input type="text" id="history-search" placeholder="Buscar por ID de paciente...">
+                        <input type="text" id="history-search" placeholder="Buscar por ID, nombre o apellido..."
+                            oninput="searchHistory()">
                         <button class="btn-secondary" onclick="searchHistory()">Buscar</button>
                     </div>
                     <div class="table-container">

@@ -210,6 +210,33 @@ function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
 }
 
+window.openNewPatientModal = function () {
+    const form = document.getElementById('patient-form');
+    if (form) form.reset();
+    const pid = document.getElementById('p-id');
+    if (pid) pid.value = '';
+    openModal('patient-modal');
+};
+
+window.openNewAppointmentModal = function () {
+    const form = document.getElementById('appointment-form');
+    if (form) form.reset();
+    const aid = document.getElementById('a-id');
+    if (aid) aid.value = '';
+    const title = document.getElementById('appointment-modal-title');
+    if (title) title.textContent = 'Nuevo Turno';
+    openModal('appointment-modal');
+};
+
+window.openNewHistoryModal = function () {
+    const form = document.getElementById('history-form');
+    if (form) form.reset();
+    const hid = document.getElementById('h-id');
+    if (hid) hid.value = '';
+    if (typeof clearPhotoPreviews === 'function') clearPhotoPreviews();
+    openModal('history-modal');
+};
+
 function setupModals() {
     window.onclick = (e) => {
         if (e.target.classList.contains('modal')) {
@@ -896,10 +923,16 @@ window.editHistory = function (id) {
     openModal('history-modal');
 };
 
-function searchHistory() {
-    const q = document.getElementById('history-search').value;
-    const history = q ? Storage.get('history').filter(h => h.patientId == q) : Storage.get('history');
+window.searchHistory = function () {
+    const q = document.getElementById('history-search').value.toLowerCase().trim();
     const patients = Storage.get('patients');
+
+    const history = q ? Storage.get('history').filter(h => {
+        const p = patients.find(pat => pat.id == h.patientId) || { name: '', lastname: '' };
+        const fullName = `${p.name} ${p.lastname}`.toLowerCase();
+        return h.patientId == q || fullName.includes(q);
+    }) : Storage.get('history');
+
     const tbody = document.getElementById('history-table-body');
     if (!tbody) return;
     tbody.innerHTML = '';
@@ -923,13 +956,22 @@ function searchHistory() {
             </tr>
         `;
     });
-}
+};
 
 window.deleteHistory = function (id) {
     if (confirm('¿Eliminar registro?')) {
         Storage.delete('history', id);
         searchHistory();
         loadDashboard();
+    }
+};
+
+window.deleteAllHistory = function () {
+    if (confirm('¿Está seguro de que desea borrar TODO el historial clínico? Esta acción no se puede deshacer.')) {
+        Storage.set('history', []);
+        searchHistory();
+        loadDashboard();
+        alert('Historial borrado completamente.');
     }
 };
 
