@@ -83,19 +83,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function setupCalendarControls() {
     document.getElementById('cal-prev')?.addEventListener('click', () => {
-        CalState.month--;
-        if (CalState.month < 0) { CalState.month = 11; CalState.year--; }
+        if (CalState.view === 'week') {
+            if (!CalState.weekDate) CalState.weekDate = new Date();
+            CalState.weekDate.setDate(CalState.weekDate.getDate() - 7);
+            CalState.month = CalState.weekDate.getMonth();
+            CalState.year = CalState.weekDate.getFullYear();
+        } else {
+            CalState.month--;
+            if (CalState.month < 0) { CalState.month = 11; CalState.year--; }
+        }
         renderCalendar();
     });
     document.getElementById('cal-next')?.addEventListener('click', () => {
-        CalState.month++;
-        if (CalState.month > 11) { CalState.month = 0; CalState.year++; }
+        if (CalState.view === 'week') {
+            if (!CalState.weekDate) CalState.weekDate = new Date();
+            CalState.weekDate.setDate(CalState.weekDate.getDate() + 7);
+            CalState.month = CalState.weekDate.getMonth();
+            CalState.year = CalState.weekDate.getFullYear();
+        } else {
+            CalState.month++;
+            if (CalState.month > 11) { CalState.month = 0; CalState.year++; }
+        }
         renderCalendar();
     });
     document.getElementById('cal-today')?.addEventListener('click', () => {
         const now = new Date();
         CalState.year = now.getFullYear();
         CalState.month = now.getMonth();
+        CalState.weekDate = new Date(now);
         renderCalendar();
     });
     document.querySelectorAll('.cal-tab').forEach(tab => {
@@ -103,6 +118,14 @@ function setupCalendarControls() {
             document.querySelectorAll('.cal-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             CalState.view = tab.dataset.view;
+            if (CalState.view === 'week') {
+                if (!CalState.weekDate || CalState.month !== CalState.weekDate.getMonth() || CalState.year !== CalState.weekDate.getFullYear()) {
+                    CalState.weekDate = new Date(CalState.year, CalState.month, 1);
+                    if (CalState.month === new Date().getMonth() && CalState.year === new Date().getFullYear()) {
+                        CalState.weekDate = new Date();
+                    }
+                }
+            }
             document.querySelectorAll('.cal-view').forEach(v => v.classList.remove('active'));
             document.getElementById(`cal-view-${CalState.view}`)?.classList.add('active');
             // Cerrar panel al cambiar de vista
@@ -413,7 +436,9 @@ function getAppointmentsForDate(dateStr) {
 // --- Renderizado principal ---
 function renderCalendar() {
     const label = document.getElementById('cal-month-label');
-    if (label) label.textContent = `${MONTHS_ES[CalState.month]} ${CalState.year}`;
+    if (label && CalState.view !== 'week') {
+        label.textContent = `${MONTHS_ES[CalState.month]} ${CalState.year}`;
+    }
 
     if (CalState.view === 'month') renderMonthView();
     else if (CalState.view === 'week') renderWeekView();
@@ -511,20 +536,35 @@ function renderWeekView() {
     const container = document.getElementById('cal-week-container');
     if (!container) return;
 
+    if (!CalState.weekDate) {
+        CalState.weekDate = new Date();
+    }
     const today = new Date();
-    // Inicio de semana del estado actual (domingo)
-    const ref = new Date(CalState.year, CalState.month, 1);
+    const ref = new Date(CalState.weekDate);
+
     const startOfWeek = new Date(ref);
     startOfWeek.setDate(ref.getDate() - ref.getDay());
 
-    const todayStr = today.toISOString().split('T')[0];
+    // Configurar el título superior para mostrar el rango de la semana
+    const label = document.getElementById('cal-month-label');
+    if (label) {
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        if (startOfWeek.getMonth() === endOfWeek.getMonth()) {
+            label.textContent = `Semana ${startOfWeek.getDate()} al ${endOfWeek.getDate()} de ${MONTHS_ES[startOfWeek.getMonth()]}`;
+        } else {
+            label.textContent = `Sem ${startOfWeek.getDate()} ${MONTHS_ES[startOfWeek.getMonth()]} al ${endOfWeek.getDate()} ${MONTHS_ES[endOfWeek.getMonth()]}`;
+        }
+    }
+
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
     let headerHTML = `<div class="cal-week-day-header"><div class="cal-week-day-col"></div>`;
     const weekDates = [];
     for (let d = 0; d < 7; d++) {
         const dt = new Date(startOfWeek);
         dt.setDate(startOfWeek.getDate() + d);
-        const ds = dt.toISOString().split('T')[0];
+        const ds = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
         weekDates.push(ds);
         const isToday = ds === todayStr;
         headerHTML += `<div class="cal-week-day-col${isToday ? ' cal-today-col' : ''}">
@@ -775,6 +815,20 @@ if (appForm) {
             const date = document.getElementById('a-date').value;
             const time = document.getElementById('a-time').value;
             const notes = document.getElementById('a-notes').value;
+
+            // Validar turno duplicado (evitar doble reserva)
+            const allAppointments = Storage.get('appointments');
+            const isDuplicate = allAppointments.some(a =>
+                a.date === date &&
+                a.time === time &&
+                a.status !== 'Cancelado' &&
+                a.id != id // Permite editar el mismo turno sin saltar el error
+            );
+
+            if (isDuplicate) {
+                alert(`⚠️ ¡ATENCIÓN! Ya existe un turno programado para el día ${date} a las ${time}.\n\nPor favor, revisa el calendario y elige otro horario para evitar sobreposiciones.`);
+                return; // Detenemos el guardado
+            }
 
             if (id) {
                 const current = Storage.get('appointments').find(a => a.id == id);
