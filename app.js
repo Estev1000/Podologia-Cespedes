@@ -248,7 +248,17 @@ window.openNewAppointmentModal = function () {
     if (aid) aid.value = '';
     const title = document.getElementById('appointment-modal-title');
     if (title) title.textContent = 'Nuevo Turno';
+
+    const patientSearch = document.getElementById('a-patient-search');
+    if (patientSearch) patientSearch.value = '';
+    const results = document.getElementById('a-patient-results');
+    if (results) { results.innerHTML = ''; results.style.display = 'none'; }
+
     openModal('appointment-modal');
+
+    if (typeof window.filterAppointmentPatients === 'function') {
+        window.filterAppointmentPatients();
+    }
 };
 
 window.openNewHistoryModal = function () {
@@ -258,6 +268,72 @@ window.openNewHistoryModal = function () {
     if (hid) hid.value = '';
     if (typeof clearPhotoPreviews === 'function') clearPhotoPreviews();
     openModal('history-modal');
+};
+
+function _escapeHtml(str) {
+    return (str || '').toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function _renderAppointmentPatientResults(patients) {
+    const results = document.getElementById('a-patient-results');
+    if (!results) return;
+
+    if (!patients || patients.length === 0) {
+        results.innerHTML = '';
+        results.style.display = 'none';
+        return;
+    }
+
+    const max = 8;
+    const items = patients.slice(0, max);
+    results.innerHTML = items.map(p => {
+        const phone = p.phone ? ` - ${_escapeHtml(p.phone)}` : '';
+        const label = `${_escapeHtml(p.name || '')} ${_escapeHtml(p.lastname || '')}${phone}`.trim();
+        return `<div class="select-result-item" onclick="selectAppointmentPatient('${_escapeHtml(p.id)}')">${label}</div>`;
+    }).join('');
+    results.style.display = 'block';
+}
+
+window.selectAppointmentPatient = function (id) {
+    const sel = document.getElementById('a-patient');
+    if (sel) sel.value = id;
+    const results = document.getElementById('a-patient-results');
+    if (results) { results.innerHTML = ''; results.style.display = 'none'; }
+};
+
+window.filterAppointmentPatients = function () {
+    const input = document.getElementById('a-patient-search');
+    const select = document.getElementById('a-patient');
+    if (!select) return;
+
+    const currentValue = select.value;
+    const q = (input ? input.value : '').trim().toLowerCase();
+
+    const patients = Storage.get('patients');
+    const filtered = q
+        ? patients.filter(p => {
+            const name = `${p.name || ''} ${p.lastname || ''}`.trim().toLowerCase();
+            const phone = (p.phone || '').toString().toLowerCase();
+            return name.includes(q) || phone.includes(q);
+        })
+        : patients;
+
+    _renderAppointmentPatientResults(q ? filtered : []);
+
+    select.innerHTML = '<option value="">Seleccione Paciente</option>';
+    filtered.forEach(p => {
+        const phoneLabel = p.phone ? ` - ${p.phone}` : '';
+        select.innerHTML += `<option value="${p.id}">${p.name} ${p.lastname}${phoneLabel}</option>`;
+    });
+
+    if (currentValue && Array.from(select.options).some(o => o.value === currentValue)) {
+        select.value = currentValue;
+    }
 };
 
 function setupModals() {
@@ -392,6 +468,10 @@ function populateSelects() {
             });
         }
     });
+
+    if (typeof window.filterAppointmentPatients === 'function') {
+        window.filterAppointmentPatients();
+    }
 }
 
 // --- Gestión de Turnos — Vista Calendario ---
@@ -742,7 +822,17 @@ window.openNewTurnoForDay = function () {
     document.getElementById('a-id').value = '';
     if (_selectedDayForNew) document.getElementById('a-date').value = _selectedDayForNew;
     document.getElementById('appointment-modal-title').textContent = 'Nuevo Turno';
+
+    const patientSearch = document.getElementById('a-patient-search');
+    if (patientSearch) patientSearch.value = '';
+    const results = document.getElementById('a-patient-results');
+    if (results) { results.innerHTML = ''; results.style.display = 'none'; }
+
     openModal('appointment-modal');
+
+    if (typeof window.filterAppointmentPatients === 'function') {
+        window.filterAppointmentPatients();
+    }
 };
 
 // --- Acciones rápidas del calendario ---
@@ -780,6 +870,16 @@ window.calReopen = function (id) {
 window.calEdit = function (id) {
     const a = Storage.get('appointments').find(x => x.id == id);
     if (!a) return;
+
+    const patientSearch = document.getElementById('a-patient-search');
+    if (patientSearch) patientSearch.value = '';
+    const results = document.getElementById('a-patient-results');
+    if (results) { results.innerHTML = ''; results.style.display = 'none'; }
+
+    if (typeof window.filterAppointmentPatients === 'function') {
+        window.filterAppointmentPatients();
+    }
+
     document.getElementById('a-id').value = a.id;
     document.getElementById('a-patient').value = a.patientId;
     document.getElementById('a-date').value = a.date;
@@ -787,6 +887,10 @@ window.calEdit = function (id) {
     document.getElementById('a-notes').value = a.notes || '';
     document.getElementById('appointment-modal-title').textContent = 'Editar Turno';
     openModal('appointment-modal');
+
+    if (typeof window.filterAppointmentPatients === 'function') {
+        window.filterAppointmentPatients();
+    }
 };
 
 window.calDelete = function (id) {
