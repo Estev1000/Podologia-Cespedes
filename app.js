@@ -1171,6 +1171,64 @@ window.closeViewer = function () {
     document.getElementById('photo-viewer').classList.remove('active');
 };
 
+// --- Buscador de Pacientes para Historial ---
+function _renderHistoryPatientResults(patients) {
+    const results = document.getElementById('h-patient-results');
+    if (!results) return;
+
+    if (!patients || patients.length === 0) {
+        results.innerHTML = '';
+        results.style.display = 'none';
+        return;
+    }
+
+    const max = 8;
+    const items = patients.slice(0, max);
+    results.innerHTML = items.map(p => {
+        const phone = p.phone ? ` - ${_escapeHtml(p.phone)}` : '';
+        const label = `${_escapeHtml(p.name || '')} ${_escapeHtml(p.lastname || '')}${phone}`.trim();
+        return `<div class="select-result-item" onclick="selectHistoryPatient('${_escapeHtml(p.id)}')">${label}</div>`;
+    }).join('');
+    results.style.display = 'block';
+}
+
+window.selectHistoryPatient = function (id) {
+    const sel = document.getElementById('h-patient');
+    if (sel) sel.value = id;
+    const results = document.getElementById('h-patient-results');
+    if (results) { results.innerHTML = ''; results.style.display = 'none'; }
+};
+
+window.filterHistoryPatients = function () {
+    const input = document.getElementById('h-patient-search');
+    const select = document.getElementById('h-patient');
+    if (!select) return;
+
+    const currentValue = select.value;
+    const q = (input ? input.value : '').trim().toLowerCase();
+
+    const patients = Storage.get('patients');
+    const filtered = q
+        ? patients.filter(p =>
+            (p.name && p.name.toLowerCase().includes(q)) ||
+            (p.lastname && p.lastname.toLowerCase().includes(q)) ||
+            (p.phone && p.phone.toLowerCase().includes(q))
+        )
+        : patients;
+
+    _renderHistoryPatientResults(q ? filtered : []);
+
+    select.innerHTML = '<option value="">Seleccione Paciente</option>';
+    filtered.forEach(p => {
+        const phoneLabel = p.phone ? ` - ${p.phone}` : '';
+        select.innerHTML += `<option value="${p.id}">${p.name} ${p.lastname}${phoneLabel}</option>`;
+    });
+
+    if (currentValue && Array.from(select.options).some(o => o.value === currentValue)) {
+        select.value = currentValue;
+    }
+};
+
 // --- Export/Import ---
 window.exportPodologyData = function () {
     const data = {
