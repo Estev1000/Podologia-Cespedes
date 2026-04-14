@@ -119,11 +119,18 @@ function setupCalendarControls() {
             tab.classList.add('active');
             CalState.view = tab.dataset.view;
             if (CalState.view === 'week') {
-                if (!CalState.weekDate || CalState.month !== CalState.weekDate.getMonth() || CalState.year !== CalState.weekDate.getFullYear()) {
-                    CalState.weekDate = new Date(CalState.year, CalState.month, 1);
-                    if (CalState.month === new Date().getMonth() && CalState.year === new Date().getFullYear()) {
-                        CalState.weekDate = new Date();
+                // Si no hay una fecha de semana sincronizada, usa hoy o el mes actual
+                if (!CalState.weekDate) {
+                    const now = new Date();
+                    if (CalState.year === now.getFullYear() && CalState.month === now.getMonth()) {
+                        CalState.weekDate = new Date(now);
+                    } else {
+                        // Usar el 15 del mes (usualmente en la segunda semana) para asegurar que se muestren turnos de todo el mes
+                        CalState.weekDate = new Date(CalState.year, CalState.month, 15);
                     }
+                } else if (CalState.month !== CalState.weekDate.getMonth() || CalState.year !== CalState.weekDate.getFullYear()) {
+                    // Si la fecha guardada no coincide con el mes/año actual, reajustar
+                    CalState.weekDate = new Date(CalState.year, CalState.month, 15);
                 }
             }
             document.querySelectorAll('.cal-view').forEach(v => v.classList.remove('active'));
