@@ -339,7 +339,8 @@
                 <input type="hidden" id="a-id">
                 <div class="form-group">
                     <label>Paciente</label>
-                    <input type="text" id="a-patient-search" placeholder="Buscar por nombre, apellido o teléfono..." oninput="filterAppointmentPatients()">
+                    <input type="text" id="a-patient-search" placeholder="Buscar por nombre, apellido o teléfono..."
+                        oninput="filterAppointmentPatients()">
                     <div id="a-patient-results" class="select-results" style="display:none;"></div>
                     <select id="a-patient" required>
                         <!-- Populated by JS -->
@@ -371,9 +372,10 @@
                 <input type="hidden" id="h-id">
                 <div class="form-group">
                     <label>Paciente</label>
-                    <input type="text" id="h-patient-search" placeholder="Buscar por nombre, apellido o teléfono..." oninput="filterHistoryPatients()">
+                    <input type="text" id="h-patient-search" placeholder="Buscar por nombre, apellido o teléfono..."
+                        oninput="filterHistoryPatients()">
                     <div id="h-patient-results" class="select-results" style="display:none;"></div>
-                    <select id="h-patient" required>
+                    <select id="h-patient" required onchange="historyPatientChanged()">
                         <!-- Populated by JS -->
                     </select>
                 </div>
@@ -472,7 +474,9 @@
         </div>
     </div>
 
-    <script src="app.min.js?v=3"></script>
+    <script src="app.min.js"></script>
+
+
 </body>
 
 </html>
